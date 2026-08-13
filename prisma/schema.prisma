@@ -1,0 +1,30 @@
+// SQLite so the scaffold runs with zero database setup.
+// The read queries add a small artificial delay (see src/db.js) to
+// simulate a real disk-backed / joined query, so caching shows a real win.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  bio       String?
+  posts     Post[]
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  likes     Int      @default(0)
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  createdAt DateTime @default(now())
+}

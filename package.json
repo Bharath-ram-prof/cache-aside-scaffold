@@ -1,0 +1,22 @@
+{
+  "name": "cache-aside-scaffold",
+  "version": "1.0.0",
+  "description": "2-endpoint Express + Prisma scaffold for applying cache-aside + stampede protection with Redis.",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:push": "prisma db push",
+    "seed": "node prisma/seed.js",
+    "verify": "node scripts/verify-invalidation.js",
+    "load": "node scripts/load.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.19.0",
+    "express": "^4.19.2",
+    "ioredis": "^5.4.1"
+  },
+  "devDependencies": {
+    "prisma": "^5.19.0"
+  }
+}
