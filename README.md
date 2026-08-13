@@ -52,10 +52,10 @@ npm start                      # http://localhost:3000
 
 ## Load testing
 
-With `wrk` (preferred):
+With `wrk` (preferred) — the `--latency` flag adds the p50/p99 distribution:
 ```bash
-wrk -t4 -c50 -d10s http://localhost:3000/posts/feed
-wrk -t4 -c50 -d10s http://localhost:3000/users/<id>
+wrk -t4 -c50 -d10s --latency http://localhost:3000/posts/feed
+wrk -t4 -c50 -d10s --latency http://localhost:3000/users/<id>
 ```
 
 No `wrk` (Windows-friendly stand-in — prints req/s and p50/p99):
