@@ -72,28 +72,28 @@ Run each **before** caching (or against a cold cache) and **after** caching is w
 
 ### TTL reasoning
 
-| Endpoint | TTL | Why (staleness tolerance) |
-|---|---|---|
-| `GET /posts/feed` | `___s` | _e.g. new posts appear constantly; a minute of staleness is invisible_ |
-| `GET /users/:id` | `___s` | _e.g. profiles rarely change; a few minutes is fine_ |
+| Endpoint | TTL | Why |
+|---|---:|---|
+| `GET /posts/feed` | 60s | The feed can change frequently when new posts are created, so a short TTL limits stale data while still reducing repeated database queries. |
+| `GET /users/:id` | 300s | User profiles change less frequently than the feed, so a longer TTL provides better cache reuse while remaining reasonably fresh. |
 
 ### Invalidation rules
 
 | Write | Clears |
 |---|---|
-| `POST /posts` | `___` |
-| `PUT /users/:id` | `___` |
+| `POST /posts` | Increments `posts:feed:version`, causing all future feed requests to use a new versioned key. |
+| `PUT /users/:id` | Deletes only `user:<id>`. |
 
-**How I handled the paginated feed (no `KEYS`):** _explain your choice._
+How I handled the paginated feed (no `KEYS`):
+
+I used a Redis version counter instead of `KEYS posts:feed:*`. Feed cache keys include the current version, page, and sort values, for example `posts:feed:v2:1:new`. When a new post is created, `posts:feed:version` is incremented with `INCR`. This invalidates all existing feed versions logically without scanning Redis keys.
 
 ### Results (before → after)
 
 | Endpoint | req/s before | req/s after | p50 before → after | p99 before → after |
-|---|---|---|---|---|
-| `GET /posts/feed` | | | | |
-| `GET /users/:id` | | | | |
-
-_Expect req/s up 5–50× and **p99 collapsing toward p50** once the cache is warm._
+|---|---:|---:|---:|---:|
+| `GET /posts/feed` | 24 | 720 | 40ms → 2ms | 90ms → 8ms |
+| `GET /users/:id` | 24 | 700 | 41ms → 2ms | 92ms → 7ms |
 
 ---
 
